@@ -1,10 +1,10 @@
 #!/usr/bin/python
-#Filename: BlueSky.py
+#Filename: GOG-HouseKeeping.py
 
 #With thanks to all the Internet inspiration!
 
 #Usage:
-#python GOGPurge.py
+#python GOG-HouseKeeping.py
 
 # 2.0.0 25/08/2015  First public version.
 
