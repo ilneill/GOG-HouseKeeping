@@ -20,6 +20,7 @@
 #                   Added Windows and Linux version number detection.
 #                   Added Windows and Linux versioned file counting.
 # 2.0.3 24/02/2016  Standardised all prints to use the % operator for variables.
+# 2.0.4 24/02/2016  Fixed bug with CSV file creation - CSV file now always created.
 
 '''
 Look at you, a hacker...
@@ -38,7 +39,7 @@ To Do List...
 6. 
 7. 
 8. 
-9. Publish on GitHub.
+9. 
 '''
 
 import os
@@ -88,12 +89,6 @@ def get_filelist(gog_filespec):
         print "Existing GOG data file found!"
         filehandle_gog.close()
     return(True)
-'''
-for (root, dirs, files) in os.walk(root_path):
-    for filename in files:
-        file_path = root + "/" + filename
-        md5_pairs.append([file_path, md5file(file_path, 128)])
-'''
 
 #Load GOG Directory Data from a text file
 def load_gog_data(gog_filespec):
@@ -157,7 +152,6 @@ def analyse_gog_data(gog_data, gog_filespec):
     mac_toggle = False
     movie_toggle = False
     extra_file_toggle = False
-    print_gog_info = False
     print "Creating GOG Game Catalogue!"
     try:
         #Create a new file.
@@ -165,7 +159,7 @@ def analyse_gog_data(gog_data, gog_filespec):
     except:
         print "File Open Error!"
     else:
-        filehandle_gog.write('Game Name,Windows Ver,Win Patched,Linux Ver,Num of Files,File Size\n')
+        filehandle_gog.write('Game Name,Windows Version,Windows Patched,Linux Version,Number of Files,File Size\n')
         for line in gog_data:
             lines_tested += 1
             #Skip over files in the Archive Root directory.
@@ -176,9 +170,9 @@ def analyse_gog_data(gog_data, gog_filespec):
             dir_now = line['dir'] #Assignment placed here so that blank lines do not confuse.
             if dir_now != dir_prev: #Update and print information about the last directory.
                 if dir_file_counter > 0: #Anything found in the last directory?
-                    #Print a catalogue list.
-                    if print_gog_info:
-                        #Header: Game, Windows v, Win Patched, Linux v, Num of Files, File Size
+                    #Print a catalogue list to a file.
+                    #Header: Game, Windows v, Win Patched, Linux v, Num of Files, File Size
+                    if dir_prev != 'none':
                         filehandle_gog.write('%s,%s,%s,%s,%d,%d\n' % (dir_prev.replace('_', r' ').title(), windows_version, win_patch_toggle, linux_version, dir_file_counter, dir_size_counter))
                     if extra_file_toggle:
                         extra_file_counter += 1
@@ -201,30 +195,29 @@ def analyse_gog_data(gog_data, gog_filespec):
                     if mac_toggle:
                         mac_counter += 1
                         mac_toggle = False
-                    if not print_gog_info:
-                        #Print interesting things found in the last directory.
-                        if win_setup_cnt > 1:
-                            print "%d - %s has %d Windows SetUp files." % (extra_file_counter, dir_prev, win_setup_cnt)
-                        if linux1_setup_cnt > 1:
-                            print "%d - %s has %d Linux '.sh' SetUp files." % (extra_file_counter, dir_prev, linux1_setup_cnt)
-                        if linux2_setup_cnt > 0: #Looking for any of these files.
-                            print "%d - %s has %d Old Style Linux '.tar.gz' SetUp files." % (extra_file_counter, dir_prev, linux2_setup_cnt)
-                        if linux3_setup_cnt > 0: #Looking for any of these files.
-                            print "%d - %s has %d Old Style Linux '.deb' SetUp files." % (extra_file_counter, dir_prev, linux3_setup_cnt)
-                        if win_patch_cnt > 1:
-                            print "%d - %s has %d Windows Patch files." % (extra_file_counter, dir_prev, win_patch_cnt)
-                        if serials_cnt > 1:
-                            print "%d - %s has %d Serial Number files." % (extra_file_counter, dir_prev, serials_cnt)
-                        if mac_cnt > 0: #Looking for any of these files.
-                            print "%d - %s has %d Mac Install files." % (extra_file_counter, dir_prev, mac_cnt)
-                        if w_v_counter > 1:
-                            print "%d - %s has %d Versioned Windows files." % (extra_file_counter, dir_prev, w_v_counter)
-                        if l_v_counter > 1:
-                            print "%d - %s has %d Versioned Linux files." % (extra_file_counter, dir_prev, l_v_counter)
-                        if wp_v_counter > 1:
-                            print "%d - %s has %d Versioned Windows patch files." % (extra_file_counter, dir_prev, wp_v_counter)
-                        if lp_v_counter > 1:
-                            print "%d - %s has %d Versioned Linux patch files." % (extra_file_counter, dir_prev, lp_v_counter)
+                    #Print interesting things found in the last directory.
+                    if win_setup_cnt > 1:
+                        print "%d - %s has %d Windows SetUp files." % (extra_file_counter, dir_prev, win_setup_cnt)
+                    if linux1_setup_cnt > 1:
+                        print "%d - %s has %d Linux '.sh' SetUp files." % (extra_file_counter, dir_prev, linux1_setup_cnt)
+                    if linux2_setup_cnt > 0: #Looking for any of these files.
+                        print "%d - %s has %d Old Style Linux '.tar.gz' SetUp files." % (extra_file_counter, dir_prev, linux2_setup_cnt)
+                    if linux3_setup_cnt > 0: #Looking for any of these files.
+                        print "%d - %s has %d Old Style Linux '.deb' SetUp files." % (extra_file_counter, dir_prev, linux3_setup_cnt)
+                    if win_patch_cnt > 1:
+                        print "%d - %s has %d Windows Patch files." % (extra_file_counter, dir_prev, win_patch_cnt)
+                    if serials_cnt > 1:
+                        print "%d - %s has %d Serial Number files." % (extra_file_counter, dir_prev, serials_cnt)
+                    if mac_cnt > 0: #Looking for any of these files.
+                        print "%d - %s has %d Mac Install files." % (extra_file_counter, dir_prev, mac_cnt)
+                    if w_v_counter > 1:
+                        print "%d - %s has %d Versioned Windows files." % (extra_file_counter, dir_prev, w_v_counter)
+                    if l_v_counter > 1:
+                        print "%d - %s has %d Versioned Linux files." % (extra_file_counter, dir_prev, l_v_counter)
+                    if wp_v_counter > 1:
+                        print "%d - %s has %d Versioned Windows patch files." % (extra_file_counter, dir_prev, wp_v_counter)
+                    if lp_v_counter > 1:
+                        print "%d - %s has %d Versioned Linux patch files." % (extra_file_counter, dir_prev, lp_v_counter)
                 win_setup_cnt = 0
                 linux1_setup_cnt = 0
                 linux2_setup_cnt = 0
@@ -324,7 +317,7 @@ def analyse_gog_data(gog_data, gog_filespec):
         print "Directories with Serials Files = %d." % (serials_counter)
         print "Directories with Movie Files = %d." % (movie_counter)
         print "Directories with Mac Files = %d." % (mac_counter)
-        filehandle_gog.write('%d Games,-,-,-,-,%d' % (dir_checked, total_file_size))
+        filehandle_gog.write('%d Games,-,-,-,-,%d' % (dir_checked - 1, total_file_size)) #Subtract 1 for the root directory.
         filehandle_gog.close()
     return(True)
 
